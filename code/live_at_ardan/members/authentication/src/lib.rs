@@ -4,12 +4,37 @@ pub fn greet_user(name: &str) -> String {
 
 pub fn read_line() -> String {
     let mut input = String::new();
-    std::io::stdin().read_line(&mut input).expect("Failed to read line");
+    std::io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
     input.trim().to_string()
 }
 
-pub fn login(username: &str, password: &str) -> bool {
-    username.to_lowercase() == "admin" && password == "password"
+#[derive(Debug, PartialEq)]
+pub enum LoginRole {
+    Admin,
+    User,
+    Denied,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum LoginAction {
+    Granted(LoginRole),
+    Denied,
+}
+
+pub fn login(username: &str, password: &str) -> Option<LoginAction> {
+    let username = username.to_lowercase();
+
+    if username != "admin" && username != "bob" {
+        return None;
+    }
+    if username == "admin" && password == "password" {
+        return Some(LoginAction::Granted(LoginRole::Admin));
+    } else if username == "bob" && password == "password" {
+        return Some(LoginAction::Granted(LoginRole::User));
+    }
+    Some(LoginAction::Denied)
 }
 
 #[cfg(test)]
@@ -23,10 +48,18 @@ mod tests {
 
     #[test]
     fn test_login() {
-        assert!(login("admin", "password"));
-        assert!(login("ADMIN", "password"));
-        assert!(!login("admin-not", "password"));
-        assert!(!login("admin", "not-password"));
-
+        assert_eq!(
+            login("admin", "password"),
+            Some(LoginAction::Granted(LoginRole::Admin))
+        );
+        assert_eq!(
+            login("ADMIN", "password"),
+            Some(LoginAction::Granted(LoginRole::Admin))
+        );
+        assert_eq!(
+            login("bob", "password"),
+            Some(LoginAction::Granted(LoginRole::User))
+        );
+        assert_eq!(login("admin", "not-password"), Some(LoginAction::Denied));
     }
 }

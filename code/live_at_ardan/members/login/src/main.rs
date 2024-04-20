@@ -1,27 +1,40 @@
-use authentication::{login, read_line};
+use authentication::{login, read_line, LoginAction, LoginRole};
 
 fn main() {
     let mut tries = 0;
     loop {
         println!("Enter your username:");
         let username = read_line();
-    
+
         println!("Enter your password:");
         let password = read_line();
-        
-        if login(&username, &password) {
-            println!("Welcome!");
-            break;
-        } else {
-            println!("Incorrect username or password");
-            tries += 1;
 
-            if tries >= 3 {
-                println!("Too many failed logins");
+        match login(&username, &password) {
+            Some(LoginAction::Granted(role)) => {
+                match role {
+                    LoginRole::Admin => {
+                        println!("Welcome {username}, you are an admin.");
+                    }
+                    LoginRole::User => {
+                        println!("Welcome {username}, you are a regular user.");
+                    }
+                    LoginRole::Denied => {
+                        unreachable!();
+                    }
+                }
                 break;
+            }
+            Some(LoginAction::Denied) => {
+                println!("Login failed.");
+                tries += 1;
+                if tries >= 3 {
+                    println!("Too many failed attempts. Exiting.");
+                    break;
+                }
+            }
+            None => {
+                println!("User does not exist.");
             }
         }
     }
-    
-    
 }
