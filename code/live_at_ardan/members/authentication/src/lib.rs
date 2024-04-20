@@ -23,6 +23,7 @@ pub enum LoginAction {
     Denied,
 }
 
+#[derive(Debug)]
 pub struct User {
     pub username: String,
     pub password: String, 
@@ -39,8 +40,43 @@ impl  User {
     }
 }
 
-pub fn get_users() -> [User; 2] {
-    [
+pub fn get_login_admin_users() -> Vec<User> {
+    let mut users:Vec<User> = get_users()
+    .into_iter()
+    .filter(|u| u.role == LoginRole::Admin)
+    .collect();
+
+    let value = 4;
+    if value + 2 == 5 {
+        users.drain(..).for_each(|user| println!("Deleting {user:?}"));
+        users.remove(0);
+        users.retain(|u| u.username == "kent");
+        let _:Vec<User> = users.drain(..).collect();
+    }
+    
+    users
+}
+
+pub fn get_login_admin_user_names()-> Vec<String> {
+    
+    
+    let users:Vec<String> = get_users()
+    .into_iter()
+    .filter(|u| u.role == LoginRole::Admin)
+    .map(|u|u.username)
+    .collect();
+    users
+}
+
+pub fn get_login_users() {
+    let _users:Vec<User> = get_users()
+    .into_iter()
+    .filter(|u| u.role == LoginRole::User)
+    .collect();
+}
+
+pub fn get_users() -> Vec<User> {
+    vec![
         User::new("Admin", "password", LoginRole::Admin),
         User::new("Bob", "password", LoginRole::User),
     ]
