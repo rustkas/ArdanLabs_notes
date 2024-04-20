@@ -1,9 +1,9 @@
-workspace = { members = [ "members/authentication", "members/hello_world", "members/login", "members/variables"] }
 [package]
-name = "live_at_ardan"
+name = "login"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+authentication={path = "../authentication"}

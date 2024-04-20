@@ -1,6 +1,5 @@
-workspace = { members = [ "members/authentication", "members/hello_world", "members/login", "members/variables"] }
 [package]
-name = "live_at_ardan"
+name = "authentication"
 version = "0.1.0"
 edition = "2021"
 
