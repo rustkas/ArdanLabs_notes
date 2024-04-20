@@ -10,7 +10,7 @@ pub fn read_line() -> String {
     input.trim().to_string()
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum LoginRole {
     Admin,
     User,
@@ -23,18 +23,40 @@ pub enum LoginAction {
     Denied,
 }
 
+pub struct User {
+    pub username: String,
+    pub password: String, 
+    pub role: LoginRole,
+}
+
+impl  User {
+    pub fn new(username: &str, password: &str, role: LoginRole) -> User {
+        Self {
+            username: username.to_ascii_lowercase(),
+            password: password.to_string(),
+            role,
+        }
+    }
+}
+
+pub fn get_users() -> [User; 2] {
+    [
+        User::new("Admin", "password", LoginRole::Admin),
+        User::new("Bob", "password", LoginRole::User),
+    ]
+}
 pub fn login(username: &str, password: &str) -> Option<LoginAction> {
     let username = username.to_lowercase();
+    let users = get_users();
 
-    if username != "admin" && username != "bob" {
-        return None;
+    if let Some(user) = users.iter().find(|user| user.username == username) {
+        if user.password == password {
+            return Some(LoginAction::Granted(user.role))
+        } else {
+            return Some(LoginAction::Denied)
+        }
     }
-    if username == "admin" && password == "password" {
-        return Some(LoginAction::Granted(LoginRole::Admin));
-    } else if username == "bob" && password == "password" {
-        return Some(LoginAction::Granted(LoginRole::User));
-    }
-    Some(LoginAction::Denied)
+    None
 }
 
 #[cfg(test)]
