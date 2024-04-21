@@ -1,5 +1,12 @@
-use std::{collections::HashMap, path::Path};
 use serde::{Serialize, Deserialize};
+use std::{collections::HashMap, path::Path};
+
+pub fn hash_password(password: &str) -> String {
+    use sha2::Digest;
+    let mut hasher = sha2::Sha256::new();
+    hasher.update(password);
+    format!("{:X}", hasher.finalize())
+}
 
 pub fn greet_user(name: &str) -> String {
     format!("Hello {name}")
@@ -37,7 +44,7 @@ impl  User {
     pub fn new(username: &str, password: &str, role: LoginRole) -> User {
         Self {
             username: username.to_ascii_lowercase(),
-            password: password.to_string(),
+            password: hash_password(password),
             role,
         }
     }
@@ -48,8 +55,8 @@ pub fn get_users() -> HashMap<String, User>{
     if users_path.exists() {
         // Load the file!
         let users_json = std::fs::read_to_string(users_path).unwrap();
-        let users = serde_json::from_str(&users_json).unwrap();
-        HashMap::new()
+        let users:HashMap<String, User> = serde_json::from_str(&users_json).unwrap();
+        users
     } else {
         // Create a file and return it
         let users = get_default_users();
@@ -69,6 +76,7 @@ fn get_default_users() -> HashMap<String, User> {
 pub fn login(username: &str, password: &str) -> Option<LoginAction> {
     let username = username.to_lowercase();
     let users = get_users();
+    let password = hash_password(password);
     
     if let Some(user) = users.get(&username) {
         if user.password == password {
