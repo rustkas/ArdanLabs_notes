@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::Path};
+use serde::{Serialize, Deserialize};
 
 pub fn greet_user(name: &str) -> String {
     format!("Hello {name}")
@@ -12,7 +13,7 @@ pub fn read_line() -> String {
     input.trim().to_string()
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Copy, Clone, Serialize, Deserialize)]
 pub enum LoginRole {
     Admin,
     User,
@@ -25,7 +26,7 @@ pub enum LoginAction {
     Denied,
 }
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone, Serialize, Deserialize)]
 pub struct User {
     pub username: String,
     pub password: String, 
@@ -42,8 +43,23 @@ impl  User {
     }
 }
 
+pub fn get_users() -> HashMap<String, User>{
+    let users_path = Path::new("users.json");
+    if users_path.exists() {
+        // Load the file!
+        let users_json = std::fs::read_to_string(users_path).unwrap();
+        let users = serde_json::from_str(&users_json).unwrap();
+        HashMap::new()
+    } else {
+        // Create a file and return it
+        let users = get_default_users();
+        let users_json = serde_json::to_string(&users).unwrap();
+        std::fs::write(users_path, users_json).unwrap();
+        users
+    }
+}
 
-pub fn get_users() -> HashMap<String, User> {
+fn get_default_users() -> HashMap<String, User> {
     let mut users = HashMap::new();
     users.insert("admin".to_string(), User::new("admin", "password", LoginRole::Admin));
     users.insert("bob".to_string(), User::new("bob", "password", LoginRole::User));
